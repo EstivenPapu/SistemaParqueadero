@@ -24,42 +24,41 @@ public class Main {
     static final String TIPO_MOTO = "Moto";
 
     static int celdasOcupadas = 0;
-    static int celdasLibres = 0;
+    static int celdasLibres = CAPACIDAD_TOTAL;
     static double recaudoCarros = 0;
     static double recaudoMotos = 0;
-    static boolean open = true;
 
 
     public static void main(String[] args) {
         imprimir("SISTEMA PARQUEADERO");
         imprimir("     BIENVENIDO    ");
 
-        String opcion;
+        int opcion;
         do {
             mostrarMenu();
             System.out.print("Elija una opción: ");
-            opcion = SC.nextLine().trim();
+            opcion = leerEnteroValidado("Elija una opción: ", 1, 5);
             switch (opcion) {
-                case "1":
+                case 1:
                     registrarEntrada();
                     break;
-                case "2":
+                case 2:
                     imprimir("Registrar salida");
                     break;
-                case "3":
+                case 3:
                     imprimir("Reporte de ocupacion");
                     break;
-                case "4":
+                case 4:
                     imprimir("Reporte financiero");
                     break;
-                case "5":
+                case 5:
                     imprimir("Hasta luego.");
                     break;
                 default:
                     imprimir("Opción no disponible todavía.");
                     break;
             }
-        } while (!opcion.equals("5"));
+        } while (opcion != 5);
         SC.close();
     }
 
@@ -71,31 +70,18 @@ public class Main {
         imprimir("5. Salir");
     }
     static void registrarEntrada() {
-        // 1. Tipo de vehículo
-        String tipo = null;
-        while (tipo == null) {
-            System.out.print("Tipo de vehículo (1. Carro, 2. Moto): ");
-            String texto = SC.nextLine().trim();
-            if (texto.equals("1")) {
-                tipo = TIPO_CARRO;
-            } else if (texto.equals("2")) {
-                tipo = TIPO_MOTO;
-            } else {
-                imprimir("Opción inválida. Digite 1 o 2.");
-            }
-        }
 
-        // 2. Fecha y hora de ingreso
+        int opcionTipo = leerEnteroValidado("Tipo de vehículo (1. Carro, 2. Moto): ", 1, 2);
+        String tipo = (opcionTipo == 1) ? TIPO_CARRO : TIPO_MOTO;
+
         LocalDateTime ingreso = leerFechaHora("Fecha y hora de ingreso (yyyy-MM-dd HH:mm): ");
 
-        // 3. Buscar una celda libre
         int indice = celdaDisponible();
         if (indice == -1) {
             imprimir("El parqueadero está lleno. No se puede registrar el ingreso.");
             return;
         }
 
-        // 4. Guardar en los dos arreglos, en el MISMO índice
         tipoVehiculo[indice] = tipo;
         fechaHoraEntrada[indice] = ingreso;
         celdasOcupadas++;
@@ -113,6 +99,20 @@ public class Main {
         return -1;
     }
 
+    static int leerEnteroValidado(String mensaje, int minimo, int maximo) {
+        while (true) {
+            System.out.print(mensaje);
+            String texto = SC.nextLine().trim();
+            int valor = (texto.isEmpty() || texto.length() > 9)
+                    ? -1
+                    : leerDigitos(texto, 0, texto.length());
+            if (valor >= minimo && valor <= maximo) {
+                return valor;
+            }
+            imprimir("Dato inválido. Ingrese un número entre " + minimo + " y " + maximo + ".");
+        }
+    }
+
     static LocalDateTime leerFechaHora(String mensaje) {
         while (true) {
             System.out.print(mensaje);
@@ -122,7 +122,12 @@ public class Main {
                 continue;
             }
 
-            return LocalDateTime.parse(texto, FORMATO_FECHA_HORA);
+            LocalDateTime fecha = LocalDateTime.parse(texto, FORMATO_FECHA_HORA);
+            if (!fecha.format(FORMATO_FECHA_HORA).equals(texto)) {
+                imprimir("Esa fecha no existe en el calendario.");
+                continue;
+            }
+            return fecha;
         }
     }
 
