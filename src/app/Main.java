@@ -89,13 +89,7 @@ public class Main {
         LocalDateTime ingreso = leerFechaHora("Fecha y hora de ingreso (yyyy-MM-dd HH:mm): ");
 
         // 3. Buscar una celda libre
-        int indice = -1;
-        for (int i = 0; i < CAPACIDAD_TOTAL; i++) {
-            if (tipoVehiculo[i] == null) {
-                indice = i;
-                break;
-            }
-        }
+        int indice = celdaDisponible();
         if (indice == -1) {
             imprimir("El parqueadero está lleno. No se puede registrar el ingreso.");
             return;
@@ -108,6 +102,15 @@ public class Main {
         celdasLibres--;
 
         imprimir("Vehículo registrado en la celda " + (indice + 1) + ".");
+    }
+
+    static int celdaDisponible() {
+        for (int i = 0; i < CAPACIDAD_TOTAL; i++) {
+            if (tipoVehiculo[i] == null) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     static LocalDateTime leerFechaHora(String mensaje) {
