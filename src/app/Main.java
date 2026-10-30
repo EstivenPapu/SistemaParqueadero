@@ -3,6 +3,8 @@ package app;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 public class Main {
 
@@ -138,7 +140,47 @@ public class Main {
     }
 
     static double liquidar(int indice, LocalDateTime salida) {
-        return 0;
+        LocalDateTime ingreso = fechaHoraEntrada[indice];
+        String tipo = tipoVehiculo[indice];
+        boolean esCarro = tipo.equals(TIPO_CARRO);
+        double tarifaHora = esCarro ? TARIFA_HORA_CARRO : TARIFA_HORA_MOTO;
+        double tarifaDia = esCarro ? TARIFA_DIA_CARRO : TARIFA_DIA_MOTO;
+
+        long diasACobrar = contarDiasCompletos(ingreso, salida);
+        LocalDateTime cursor = ingreso.plusDays(diasACobrar);
+        long horasACobrar = calcularHorasRestantes(cursor, salida);
+
+        if (horasACobrar >= UMBRAL_HORAS_DIA) {
+            diasACobrar++;
+            horasACobrar = 0;
+        }
+
+        double total = diasACobrar * tarifaDia + horasACobrar * tarifaHora;
+        imprimirFactura(indice, tipo, ingreso, salida,
+                diasACobrar, tarifaDia, horasACobrar, tarifaHora, total);
+        return total;
+    }
+
+    static void imprimirFactura(int indice, String tipo, LocalDateTime ingreso,
+                                LocalDateTime salida, long dias, double tarifaDia,
+                                long horas, double tarifaHora, double total) {
+        imprimir("\n----------- FACTURA -----------");
+        imprimir("Celda liberada: " + (indice + 1));
+        imprimir("Tipo de vehículo: " + tipo);
+        imprimir("Ingreso: " + ingreso.format(FORMATO_FECHA_HORA));
+        imprimir("Salida:  " + salida.format(FORMATO_FECHA_HORA));
+        if (dias > 0) {
+            imprimir(dias + " día(s) x " + dinero(tarifaDia) + " = " + dinero(dias * tarifaDia));
+        }
+        if (horas > 0) {
+            imprimir(horas + " hora(s) x " + dinero(tarifaHora) + " = " + dinero(horas * tarifaHora));
+        }
+        imprimir("TOTAL A PAGAR: " + dinero(total));
+        imprimir("-------------------------------");
+    }
+
+    static String dinero(double valor) {
+        return String.format("$%,.0f", valor);
     }
 
     static int celdaDisponible() {
@@ -180,6 +222,15 @@ public class Main {
             }
             return fecha;
         }
+    }
+
+    static long contarDiasCompletos(LocalDateTime ingreso, LocalDateTime salida) {
+        return ChronoUnit.DAYS.between(ingreso, salida);
+    }
+
+    static long calcularHorasRestantes(LocalDateTime cursor, LocalDateTime salida) {
+        long minutosRestantes = Duration.between(cursor, salida).toMinutes();
+        return (minutosRestantes + 59) / 60;
     }
 
     static boolean formatoFechaHoraValido(String texto) {
