@@ -17,16 +17,97 @@ public class Main {
     static final DateTimeFormatter FORMATO_FECHA_HORA = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     static final Scanner SC = new Scanner(System.in);
 
-    String[] tipoVehiculo = new String[CAPACIDAD_TOTAL];
-    LocalDateTime[] fechaHoraEntrada = new LocalDateTime[CAPACIDAD_TOTAL];
+    static String[] tipoVehiculo = new String[CAPACIDAD_TOTAL];
+    static LocalDateTime[] fechaHoraEntrada = new LocalDateTime[CAPACIDAD_TOTAL];
+
+    static final String TIPO_CARRO = "Carro";   // constantes nuevas
+    static final String TIPO_MOTO = "Moto";
 
     static int celdasOcupadas = 0;
+    static int celdasLibres = 0;
     static double recaudoCarros = 0;
     static double recaudoMotos = 0;
+    static boolean open = true;
+
 
     public static void main(String[] args) {
+        imprimir("SISTEMA PARQUEADERO");
+        imprimir("     BIENVENIDO    ");
 
+        String opcion;
+        do {
+            mostrarMenu();
+            System.out.print("Elija una opción: ");
+            opcion = SC.nextLine().trim();
+            switch (opcion) {
+                case "1":
+                    registrarEntrada();
+                    break;
+                case "2":
+                    imprimir("Registrar salida");
+                    break;
+                case "3":
+                    imprimir("Reporte de ocupacion");
+                    break;
+                case "4":
+                    imprimir("Reporte financiero");
+                    break;
+                case "5":
+                    imprimir("Hasta luego.");
+                    break;
+                default:
+                    imprimir("Opción no disponible todavía.");
+                    break;
+            }
+        } while (!opcion.equals("5"));
+        SC.close();
+    }
 
+    static void mostrarMenu(){
+        imprimir("1. Registrar entrada");
+        imprimir("2. Registrar salida");
+        imprimir("3. Reporte de ocupación");
+        imprimir("4. Reporte financiero");
+        imprimir("5. Salir");
+    }
+    static void registrarEntrada() {
+        // 1. Tipo de vehículo
+        String tipo = null;
+        while (tipo == null) {
+            System.out.print("Tipo de vehículo (1. Carro, 2. Moto): ");
+            String texto = SC.nextLine().trim();
+            if (texto.equals("1")) {
+                tipo = TIPO_CARRO;
+            } else if (texto.equals("2")) {
+                tipo = TIPO_MOTO;
+            } else {
+                imprimir("Opción inválida. Digite 1 o 2.");
+            }
+        }
+
+        // 2. Fecha y hora de ingreso
+        LocalDateTime ingreso = leerFechaHora("Fecha y hora de ingreso (yyyy-MM-dd HH:mm): ");
+
+        // 3. Buscar una celda libre
+        int indice = -1;
+        for (int i = 0; i < CAPACIDAD_TOTAL; i++) {
+            if (tipoVehiculo[i] == null) {
+                indice = i;
+                break;
+            }
+        }
+        if (indice == -1) {
+            imprimir("El parqueadero está lleno. No se puede registrar el ingreso.");
+            return;
+        }
+
+        // 4. Guardar en los dos arreglos, en el MISMO índice
+        tipoVehiculo[indice] = tipo;
+        fechaHoraEntrada[indice] = ingreso;
+        celdasOcupadas++;
+        celdasLibres--;
+
+        imprimir("Vehículo registrado en la celda " + (indice + 1) + ".");
     }
 
     static LocalDateTime leerFechaHora(String mensaje) {
