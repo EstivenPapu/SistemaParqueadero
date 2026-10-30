@@ -43,7 +43,7 @@ public class Main {
                     registrarEntrada();
                     break;
                 case 2:
-                    imprimir("Registrar salida");
+                    registrarSalida();
                     break;
                 case 3:
                     imprimir("Reporte de ocupacion");
@@ -69,6 +69,7 @@ public class Main {
         imprimir("4. Reporte financiero");
         imprimir("5. Salir");
     }
+
     static void registrarEntrada() {
 
         int opcionTipo = leerEnteroValidado("Tipo de vehículo (1. Carro, 2. Moto): ", 1, 2);
@@ -88,6 +89,56 @@ public class Main {
         celdasLibres--;
 
         imprimir("Vehículo registrado en la celda " + (indice + 1) + ".");
+    }
+
+    static void registrarSalida() {
+        if (celdasOcupadas == 0) {
+            imprimir("No hay vehículos en el parqueadero.");
+            return;
+        }
+
+        // 1. Celda: dentro del rango y ocupada
+        int indice;
+        while (true) {
+            int celda = leerEnteroValidado("Número de celda (1-" + CAPACIDAD_TOTAL + "): ", 1, CAPACIDAD_TOTAL);
+            indice = celda - 1;
+            if (tipoVehiculo[indice] != null) {
+                break;
+            }
+            imprimir("La celda " + celda + " está libre. Elija una celda ocupada.");
+        }
+
+        // 2. Fecha de salida: no puede ser anterior al ingreso
+        LocalDateTime salida;
+        while (true) {
+            salida = leerFechaHora("Fecha y hora de salida (yyyy-MM-dd HH:mm): ");
+            if (!salida.isBefore(fechaHoraEntrada[indice])) {
+                break;
+            }
+            imprimir("La salida no puede ser anterior al ingreso ("
+                    + fechaHoraEntrada[indice].format(FORMATO_FECHA_HORA) + ").");
+        }
+
+        // 3. Liquidar y acumular (el tipo se guarda ANTES de liberar la celda)
+        boolean esCarro = tipoVehiculo[indice].equals(TIPO_CARRO);
+        double total = liquidar(indice, salida);
+        if (esCarro) {
+            recaudoCarros += total;
+        } else {
+            recaudoMotos += total;
+        }
+
+        // 4. Liberar la celda
+        tipoVehiculo[indice] = null;
+        fechaHoraEntrada[indice] = null;
+        celdasOcupadas--;
+        celdasLibres++;
+
+        imprimir("Celda " + (indice + 1) + " liberada.");
+    }
+
+    static double liquidar(int indice, LocalDateTime salida) {
+        return 0;
     }
 
     static int celdaDisponible() {
