@@ -38,7 +38,6 @@ public class Main {
         int opcion;
         do {
             mostrarMenu();
-            System.out.print("Elija una opción: ");
             opcion = leerEnteroValidado("Elija una opción: ", 1, 5);
             switch (opcion) {
                 case 1:
@@ -48,10 +47,10 @@ public class Main {
                     registrarSalida();
                     break;
                 case 3:
-                    imprimir("Reporte de ocupacion");
+                    reporteOcupacion();
                     break;
                 case 4:
-                    imprimir("Reporte financiero");
+                    reporteFinanciero();
                     break;
                 case 5:
                     imprimir("Hasta luego.");
@@ -62,6 +61,19 @@ public class Main {
             }
         } while (opcion != 5);
         SC.close();
+    }
+
+    static void reporteOcupacion() {
+        imprimir("\n--- Reporte de ocupación ---");
+        imprimir("Celdas ocupadas: " + celdasOcupadas);
+        imprimir("Celdas libres: " + celdasLibres);
+    }
+
+    static void reporteFinanciero() {
+        imprimir("\n--- Reporte financiero ---");
+        imprimir("Recaudo carros: " + dinero(recaudoCarros));
+        imprimir("Recaudo motos: " + dinero(recaudoMotos));
+        imprimir("Total general: " + dinero(recaudoCarros + recaudoMotos));
     }
 
     static void mostrarMenu(){
@@ -161,9 +173,7 @@ public class Main {
         return total;
     }
 
-    static void imprimirFactura(int indice, String tipo, LocalDateTime ingreso,
-                                LocalDateTime salida, long dias, double tarifaDia,
-                                long horas, double tarifaHora, double total) {
+    static void imprimirFactura(int indice, String tipo, LocalDateTime ingreso, LocalDateTime salida, long dias, double tarifaDia, long horas, double tarifaHora, double total) {
         imprimir("\n----------- FACTURA -----------");
         imprimir("Celda liberada: " + (indice + 1));
         imprimir("Tipo de vehículo: " + tipo);
